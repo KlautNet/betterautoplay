@@ -1,4 +1,7 @@
+use std::path::Path;
+
 use clap::{Parser, Subcommand};
+mod db;
 mod music;
 
 /// Betterautoplay is a simple cli tool to improve your apple music experience
@@ -46,6 +49,8 @@ enum Commands {
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
+    let db = db::Db::open(Path::new("./data"))?;
+
     match args.command {
         Commands::Now => {
             let now_playing = music::now_playing()?;
@@ -64,7 +69,15 @@ fn main() -> anyhow::Result<()> {
             }
         }
         Commands::Status => {
-            println!("Music player is running");
+            let recent_plays = db.recent_plays(10)?;
+            if recent_plays.is_empty() {
+                println!("No recent plays found");
+            } else {
+                println!("Recent plays:");
+                for play in recent_plays {
+                    println!("{}", play);
+                }
+            }
         }
         Commands::Recommend { num_songs } => {
             println!("Recommending {num_songs} songs based on your listening history");
