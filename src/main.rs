@@ -39,6 +39,8 @@ enum Commands {
         #[arg(short, long, default_value_t = 30)]
         days: u32,
     },
+    /// Skip to the next track
+    Next,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -51,6 +53,14 @@ fn main() -> anyhow::Result<()> {
                 println!("{}", now_playing);
             } else {
                 println!("No song is currently playing");
+            }
+        }
+        Commands::Next => {
+            let skipped = music::next_track()?;
+            if skipped {
+                println!("Skipped to the next track");
+            } else {
+                println!("Nothing playing");
             }
         }
         Commands::Status => {

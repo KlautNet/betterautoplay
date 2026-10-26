@@ -42,20 +42,28 @@ impl std::fmt::Display for NowPlaying {
 }
 
 pub fn now_playing() -> Result<Option<NowPlaying>> {
+    let now_playing = run_jxa(include_str!("js/now_playing.js"))?;
+    serde_json::from_str(&now_playing).context("Failed to parse now playing data")
+}
+
+pub fn next_track() -> Result<bool> {
+    let skipped = run_jxa(include_str!("js/next_track.js"))?;
+    serde_json::from_str(&skipped).context("Failed to parse skipping data")
+}
+
+fn run_jxa(script: &str) -> Result<String> {
     let output = std::process::Command::new("osascript")
-        .args(["-l", "JavaScript", "-e", include_str!("js/now_playing.js")])
+        .args(["-l", "JavaScript", "-e", script])
         .output()
         .context("Failed to execute osascript command")?;
 
     if !output.status.success() {
         bail!(
-            "Failed to get now playing data: {}",
+            "osascript failed: {}",
             String::from_utf8_lossy(&output.stderr).trim()
         );
     }
-
-    let now_playing = String::from_utf8_lossy(&output.stdout);
-    serde_json::from_str(&now_playing).context("Failed to parse now playing data")
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
 fn format_duration(duration: f64) -> String {

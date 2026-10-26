@@ -4,17 +4,14 @@ function run(argv) {
 
   const playerState = Music.playerState();
 
-  if (["playing", "paused"].includes(playerState)) {
-    const track = Music.currentTrack();
-    return JSON.stringify({
-      title: track.name(),
-      artist: track.artist(),
-      album: track.album(),
-      duration: track.duration(),
-      player_position: Music.playerPosition(),
-      player_state: playerState,
-    });
-  } else {
-    return "null";
-  }
+  if (!["playing", "paused"].includes(playerState)) return "null";
+  const track = Music.currentTrack();
+  return JSON.stringify({
+    title: track.name(),
+    artist: track.artist(),
+    album: track.album(),
+    duration: track.duration(),
+    player_position: Music.playerPosition(),
+    player_state: playerState,
+  });
 }
